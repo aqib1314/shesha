@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shisha Cafe - Menu</title>
 <style>
-*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#0f0f0f;color:#fff;margin:0;padding:14px;padding-bottom:140px}
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#0f0f0f;color:#fff;margin:0;padding:14px;padding-bottom:230px}
 .top{text-align:center;background:linear-gradient(135deg,#ff9800,#ff5722);color:#000;padding:18px;border-radius:16px}
 .top h1{margin:0;font-size:28px}.top p{margin:4px 0 0;font-weight:bold}
 .cat{margin-top:22px}.cat h2{font-size:20px;border-left:5px solid #ff9800;padding-left:10px;margin:0 0 5px}.price{color:#ffcc80;font-size:13px;margin:0 0 10px 15px}
@@ -19,6 +19,7 @@
 #sel{font-size:14px;color:#ffcc80;min-height:20px}
 .other{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .other button{background:#222;color:#fff;border:1px solid #444;padding:14px;border-radius:12px;font-size:15px}
+#newBtn{display:none;background:#00c853 !important;margin-top:8px}
 </style>
 </head>
 <body>
@@ -33,10 +34,12 @@
 <div class="bar">
 <div id="sel">👆 Select any flavour from above</div>
 <textarea id="comment" rows="2" placeholder="Write comment... e.g. Keep it cold, extra minty, sweet"></textarea>
-<button onclick="confirmOrder()">✅ CONFIRM ORDER</button>
+<button id="confirmBtn" onclick="confirmOrder()">✅ CONFIRM ORDER</button>
+<button id="newBtn" onclick="resetOrder()">🔄 NEW ORDER</button>
 <div id="msg" style="text-align:center;margin-top:8px;color:#7CFC00;font-weight:bold"></div>
 </div>
 <script>
+window.addEventListener('pageshow', function(e){ resetOrder(); });
 let t = new URLSearchParams(location.search).get('t') || '1';
 document.getElementById('table').innerText = 'Table No: ' + t;
 let selected = null; let selectedCat = ''; let selectedPrice = '';
@@ -63,20 +66,35 @@ selected=name; selectedCat=cat; selectedPrice=price;
 document.getElementById('sel').innerText='Selected: '+name+' | '+price;
 window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
 }
+function resetOrder(){
+selected=null; selectedCat=''; selectedPrice='';
+document.querySelectorAll('.item').forEach(e=>e.classList.remove('selected'));
+document.getElementById('sel').innerText='👆 Select any flavour from above';
+document.getElementById('comment').value='';
+document.getElementById('msg').innerText='';
+document.getElementById('confirmBtn').style.display='block';
+document.getElementById('newBtn').style.display='none';
+}
 function confirmOrder(){
 if(!selected){alert('Please select a flavour first!');return;}
 let c=document.getElementById('comment').value;
 let msg='✅ ORDER CONFIRMED!\nTable '+t+' - '+selected+'\n'+selectedCat+' - '+selectedPrice;
 if(c) msg+='\nComment: '+c;
-document.getElementById('msg').innerText=msg;
-let wa='923048356703';
+document.getElementById('msg').innerText='✅ ORDER CONFIRMED! Table '+t+' - '+selected;
+document.getElementById('confirmBtn').style.display='none';
+document.getElementById('newBtn').style.display='block';
+let wa='923001234567';
 let text=encodeURIComponent('NEW ORDER\nTable: '+t+'\nFlavour: '+selected+'\n'+selectedCat+'\n'+selectedPrice+'\nComment: '+c);
 window.open('https://wa.me/'+wa+'?text='+text);
+setTimeout(()=>{ resetOrder(); }, 8000);
 alert(msg);
 }
 function quick(what){
 let c=document.getElementById('comment').value;
-alert('✅ Request Received!\nTable '+t+' - '+what+'\nComment: '+c);
+let wa='923048356703';
+let text=encodeURIComponent(what+'\nTable: '+t+'\nComment: '+c);
+window.open('https://wa.me/'+wa+'?text='+text);
+alert('✅ Request Sent!\nTable '+t+' - '+what);
 }
 </script>
 </body>
