@@ -1,35 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="ur">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shisha Cafe</title>
+<title>Shisha Cafe - Menu</title>
 <style>
-body{font-family:sans-serif;background:#111;color:#fff;text-align:center;padding:20px}
-.card{background:#222;padding:20px;border-radius:15px;margin:15px}
-button{background:#ff9800;border:none;padding:15px 25px;border-radius:10px;font-size:18px;margin:5px;font-weight:bold}
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#0f0f0f;color:#fff;margin:0;padding:14px;padding-bottom:120px}
+.top{text-align:center;background:linear-gradient(135deg,#ff9800,#ff5722);color:#000;padding:18px;border-radius:16px}
+.top h1{margin:0;font-size:28px}.top p{margin:4px 0 0;font-weight:bold}
+.cat{margin-top:22px}.cat h2{font-size:20px;border-left:5px solid #ff9800;padding-left:10px;margin:0 0 5px}.price{color:#ffcc80;font-size:13px;margin:0 0 10px 15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{background:#1e1e1e;border:1px solid #333;padding:12px;border-radius:12px;cursor:pointer;text-align:left}
+.item.selected{border:2px solid #ff9800;background:#2b1d00}
+.item b{font-size:15px}.item span{font-size:12px;color:#aaa;display:block;margin-top:2px}
+.bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;padding:12px;border-top:2px solid #ff9800}
+.bar textarea{width:100%;padding:10px;border-radius:10px;border:none;background:#2a2a2a;color:#fff;margin:8px 0;resize:none}
+.bar button{width:100%;background:#ff9800;border:none;padding:15px;border-radius:12px;font-size:18px;font-weight:bold}
+#sel{font-size:14px;color:#ffcc80;min-height:20px}
+.other{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.other button{background:#222;color:#fff;border:1px solid #444;padding:14px;border-radius:12px;font-size:15px}
 </style>
 </head>
 <body>
-<h1>🔥 Shisha Cafe</h1>
-<h2 id="table">Loading...</h2>
-<div class="card">
-<h3>Flavour Select Karo</h3>
-<button onclick="order('Double Apple')">Double Apple</button>
-<button onclick="order('Mint')">Mint</button>
-<button onclick="order('Blueberry')">Blueberry</button>
+<div class="top"><h1>🔥 SHISHA CAFE</h1><p id="table">Table Loading...</p><p style="font-size:13px;font-weight:normal">Relax, Unwind, Inhale the Flavor</p></div>
+
+<div id="menu"></div>
+
+<div class="other">
+<button onclick="quick('Coal Refresh')">🔥 Coal Refresh</button>
+<button onclick="quick('Bill Chahiye')">🧾 Bill Chahiye</button>
+<button onclick="quick('Help Chahiye')">🆘 Help</button>
+<button onclick="quick('Custom Mix Chahiye')">✨ Custom Mix</button>
 </div>
-<div class="card">
-<button onclick="order('Coal Refresh')">🔥 Coal Refresh</button>
-<button onclick="order('Bill Chahiye')">🧾 Bill</button>
-<button onclick="order('Help Chahiye')">🆘 Help</button>
+
+<div class="bar">
+<div id="sel">👆 اوپر سے کوئی فلیور سلیکٹ کرو</div>
+<textarea id="comment" rows="2" placeholder="کمنٹ لکھو... مثال: ٹھنڈا رکھنا ہے، منٹی رکھنا ہے، سویٹی رکھنا ہے"></textarea>
+<button onclick="confirmOrder()">✅ ORDER CONFIRM KARO</button>
+<div id="msg" style="text-align:center;margin-top:8px;color:#7CFC00;font-weight:bold"></div>
 </div>
-<h3 id="msg"></h3>
+
 <script>
 let t = new URLSearchParams(location.search).get('t') || '1';
 document.getElementById('table').innerText = 'Table No: ' + t;
-function order(item){
-document.getElementById('msg').innerText = '✅ Order mil gaya! Table '+t+' - '+item;
+let selected = null;
+let selectedCat = '';
+let selectedPrice = '';
+const data = [
+{cat:'REGULAR FLAVORS', price:'Rs 4,700 + Tax', items:['BLUEBERRY','GUAVA','DOUBLE APPLE','MAGIC LOVE','WATERMELON','COCONUT','DUNHILL','PAN ZAFRAN']},
+{cat:'TURKISH FLAVORS', price:'Rs 5,200 + Tax', items:['PAN','KIWI','BERRY','GRAPE','VANILLA','ORANGE','LEMON','MINT']},
+{cat:'AMERICAN FLAVORS', price:'Rs 4,700 + Tax', items:['HAPPY MANGO','DEJAVU','LOVE 66','LADY-KILLER','PARADISE ISLAND','ISTANBUL NIGHTS','MASTER MIX','FRESH BERRY']},
+{cat:'MIXED FLAVORS', price:'Rs 5,500 + Tax', items:['PINK','BLUE MIST','MARBELLA','PUNK MAN','BLUE MELON','NIGHTS 1001','HAVANA','MANGO DEJAVU','PAN KIWI MINT','LADY-K-LOVE66','PAN PARAG','JACK SPARROW','MANGO GUAVA','PEACH MANGO','PAN KIWI DUNHILL','PAN SPRING WATER']},
+{cat:'SPECIAL FLAVORS', price:'Rs 6,500 + Tax', items:['PARADISE PEACH','DEJAVU LOVE 66','DUBAI SPECIAL','M SPECIAL','PAN-PINK','PINK-BLUE MIST','HAPPY MARBELLA','FRUITY FIRE','PINK-MARBELLA','LEGENDARY','GOLDEN']},
+];
+let html='';
+data.forEach((g)=>{
+html+='<div class="cat"><h2>'+g.cat+'</h2><p class="price">'+g.price+'</p><div class="grid">';
+g.items.forEach(f=>{
+html+='<div class="item" onclick="pick(this,\''+f+'\',\''+g.cat+'\',\''+g.price+'\')"><b>'+f+'</b><span>'+g.price+'</span></div>';
+});
+html+='</div></div>';
+});
+document.getElementById('menu').innerHTML=html;
+function pick(el,name,cat,price){
+document.querySelectorAll('.item').forEach(e=>e.classList.remove('selected'));
+el.classList.add('selected');
+selected=name; selectedCat=cat; selectedPrice=price;
+document.getElementById('sel').innerText='Selected: '+name+' | '+price;
+window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+function confirmOrder(){
+if(!selected){alert('Pehle koi flavour select karo!');return;}
+let c=document.getElementById('comment').value;
+let msg='✅ ORDER CONFIRM HO GAYA!\nTable '+t+' - '+selected+'\n'+selectedCat+' - '+selectedPrice;
+if(c) msg+='\nComment: '+c;
+document.getElementById('msg').innerText=msg;
+ WhatsApp par bhejne ke liye - neeche apna number daalo
+let wa='923048356703';
+let text=encodeURIComponent('NEW ORDER\nTable: '+t+'\nFlavour: '+selected+'\n'+selectedCat+'\n'+selectedPrice+'\nComment: '+c);
+ window.open('https://wa.me/'+wa+'?text='+text);
+alert(msg);
+}
+function quick(what){
+let c=document.getElementById('comment').value;
+alert('✅ Request mil gayi!\nTable '+t+' - '+what+'\nComment: '+c);
 }
 </script>
 </body>
