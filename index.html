@@ -75,7 +75,6 @@ let c=document.getElementById('comment').value;
 let msg='✅ ORDER CONFIRM HO GAYA!\nTable '+t+' - '+selected+'\n'+selectedCat+' - '+selectedPrice;
 if(c) msg+='\nComment: '+c;
 document.getElementById('msg').innerText=msg;
- WhatsApp par bhejne ke liye - neeche apna number daalo
 let wa='923048356703';
 let text=encodeURIComponent('NEW ORDER\nTable: '+t+'\nFlavour: '+selected+'\n'+selectedCat+'\n'+selectedPrice+'\nComment: '+c);
  window.open('https://wa.me/'+wa+'?text='+text);
