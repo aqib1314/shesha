@@ -12,7 +12,7 @@
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .item{background:#1e1e1e;border:1px solid #333;padding:12px;border-radius:12px;cursor:pointer;text-align:left}
 .item.selected{border:2px solid #ff9800;background:#2b1d00}
-.item b{font-size:14px}.item span{font-size:12px;color:#aaa;display:block;margin-top:2px}
+.item b{font-size:15px}
 .bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;padding:12px;border-top:2px solid #ff9800}
 .bar textarea{width:100%;padding:10px;border-radius:10px;border:none;background:#2a2a2a;color:#fff;margin:8px 0;resize:none}
 .bar button{width:100%;background:#ff9800;border:none;padding:15px;border-radius:12px;font-size:18px;font-weight:bold}
@@ -32,7 +32,7 @@
 <button onclick="quick('Custom Mix Needed')">✨ Custom Mix</button>
 </div>
 <div class="bar">
-<div id="sel">👆 Select any flavour from above</div>
+<div id="sel">👆 Select any flavour from above - You can select 2-3 flavours</div>
 <textarea id="comment" rows="2" placeholder="Write comment... e.g. Keep it cold, extra minty, sweet"></textarea>
 <button id="confirmBtn" onclick="confirmOrder()">✅ CONFIRM ORDER</button>
 <button id="newBtn" onclick="resetOrder()">🔄 NEW ORDER</button>
@@ -42,7 +42,7 @@
 window.addEventListener('pageshow', function(e){ resetOrder(); });
 let t = new URLSearchParams(location.search).get('t') || '1';
 document.getElementById('table').innerText = 'Table No: ' + t;
-let selected = null; let selectedCat = ''; let selectedPrice = '';
+let selectedList = [];
 const data = [
 {cat:'REGULAR FLAVORS', price:'Rs 4,700 + Tax', items:['PAN','KIWI','BERRY','GRAPE','BLUEBERRY','GUAVA','DOUBLE APPLE','MAGIC LOVE','VANILLA','ORANGE','LEMON','MINT','WATERMELON','COCONUT','DUNHILL','PAN ZAFRAN']},
 {cat:'TURKISH FLAVORS', price:'Rs 5,200 + Tax', items:['HAPPY MANGO','DEJAVU','LOVE66','LADY-KILLER','PARADISE ISLAND','ISTANBUL NIGHTS','MASTER MIX','FRESH BERRY','PUNK MAN','BLUE MELON','NIGHTS 1001','HAVANA']},
@@ -54,37 +54,46 @@ let html='';
 data.forEach((g)=>{
 html+='<div class="cat"><h2>'+g.cat+'</h2><p class="price">'+g.price+'</p><div class="grid">';
 g.items.forEach(f=>{
-html+='<div class="item" onclick="pick(this,\''+f+'\',\''+g.cat+'\',\''+g.price+'\')"><b>'+f+'</b><span>'+g.price+'</span></div>';
+html+='<div class="item" onclick="pick(this,\''+f+'\',\''+g.cat+'\',\''+g.price+'\')"><b>'+f+'</b></div>';
 });
 html+='</div></div>';
 });
 document.getElementById('menu').innerHTML=html;
 function pick(el,name,cat,price){
-document.querySelectorAll('.item').forEach(e=>e.classList.remove('selected'));
+let idx = selectedList.findIndex(x=>x.name===name);
+if(idx>=0){
+selectedList.splice(idx,1);
+el.classList.remove('selected');
+} else {
+selectedList.push({name:name, cat:cat, price:price});
 el.classList.add('selected');
-selected=name; selectedCat=cat; selectedPrice=price;
-document.getElementById('sel').innerText='Selected: '+name+' | '+price;
-window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+if(selectedList.length===0){
+document.getElementById('sel').innerText='👆 Select any flavour from above - You can select 2-3 flavours';
+} else {
+document.getElementById('sel').innerText='Selected ('+selectedList.length+'): '+selectedList.map(x=>x.name).join(', ');
+}
 }
 function resetOrder(){
-selected=null; selectedCat=''; selectedPrice='';
+selectedList=[];
 document.querySelectorAll('.item').forEach(e=>e.classList.remove('selected'));
-document.getElementById('sel').innerText='👆 Select any flavour from above';
+document.getElementById('sel').innerText='👆 Select any flavour from above - You can select 2-3 flavours';
 document.getElementById('comment').value='';
 document.getElementById('msg').innerText='';
 document.getElementById('confirmBtn').style.display='block';
 document.getElementById('newBtn').style.display='none';
 }
 function confirmOrder(){
-if(!selected){alert('Please select a flavour first!');return;}
+if(selectedList.length===0){alert('Please select a flavour first!');return;}
 let c=document.getElementById('comment').value;
-let msg='✅ ORDER CONFIRMED!\nTable '+t+' - '+selected+'\n'+selectedCat+' - '+selectedPrice;
+let listText = selectedList.map((x,i)=> (i+1)+'. '+x.name+' - '+x.cat+' - '+x.price).join('\n');
+let msg='✅ ORDER CONFIRMED!\nTable '+t+'\n'+listText;
 if(c) msg+='\nComment: '+c;
-document.getElementById('msg').innerText='✅ ORDER CONFIRMED! Table '+t+' - '+selected;
+document.getElementById('msg').innerText='✅ ORDER CONFIRMED! Table '+t+' - '+selectedList.map(x=>x.name).join(', ');
 document.getElementById('confirmBtn').style.display='none';
 document.getElementById('newBtn').style.display='block';
 let wa='923048356703';
-let text=encodeURIComponent('NEW ORDER\nTable: '+t+'\nFlavour: '+selected+'\n'+selectedCat+'\n'+selectedPrice+'\nComment: '+c);
+let text=encodeURIComponent('NEW ORDER\nTable: '+t+'\n'+listText+'\nComment: '+c);
 window.open('https://wa.me/'+wa+'?text='+text);
 setTimeout(()=>{ resetOrder(); }, 8000);
 alert(msg);
